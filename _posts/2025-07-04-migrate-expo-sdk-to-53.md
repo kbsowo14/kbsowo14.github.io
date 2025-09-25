@@ -123,7 +123,7 @@ queryClient.invalidateQueries({ queryKey: queryKey })
 ListEmptyComponent={
   <>
     {!isLoading && isEnd && (
-      ListEmptyComponent || <MoaEmpty text="목록내역이 없습니다." />
+      ListEmptyComponent || <Empty text="목록내역이 없습니다." />
     )}
   </>
 }
@@ -132,7 +132,7 @@ ListEmptyComponent={
 ListEmptyComponent={
   <View>
     {!isLoading && isEnd && (
-      ListEmptyComponent || <MoaEmpty text="목록내역이 없습니다." />
+      ListEmptyComponent || <Empty text="목록내역이 없습니다." />
     )}
   </View>
 }
@@ -302,7 +302,7 @@ const token = await getToken(messaging)
 
 ---
 
-## 1️⃣3️⃣ MoaRefreshView ref 오버라이딩 이슈
+## 1️⃣3️⃣ RefreshView ref 오버라이딩 이슈
 
 props로 전달된 `ref: null`이 내부 ref를 오버라이딩하는 문제가 발생했다.
 
