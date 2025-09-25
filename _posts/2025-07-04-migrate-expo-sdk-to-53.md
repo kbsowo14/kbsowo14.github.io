@@ -354,14 +354,14 @@ WebView의 `decelerationRate`에서 문자열 값이 에러를 발생시켰다.
 Expo SDK 53 마이그레이션은 생각보다 많은 Breaking Changes를 동반했다. 특히 다음 부분들이 가장 까다로웠다:
 
 ### 😤 가장 힘들었던 부분들
-1. **react-native-gesture-handler Touchable 시리즈 deprecated**
-2. **Firebase API 전면 변경**
-3. **각종 라이브러리들의 props 전달 방식 변경**
+- **react-native-gesture-handler Touchable 시리즈 deprecated**
+- **Firebase API 전면 변경**
+- **각종 라이브러리들의 props 전달 방식 변경**
 
 ### 🎉 좋아진 점들
-1. **성능 개선**: 전반적인 앱 성능이 향상되었다
-2. **안정성 증가**: 불필요한 리렌더링과 메모리 누수가 줄어들었다
-3. **최신 iOS 요구사항 충족**: App Store 배포 준비 완료
+- **성능 개선**: 전반적인 앱 성능이 향상되었다
+- **안정성 증가**: 불필요한 리렌더링과 메모리 누수가 줄어들었다
+- **최신 iOS 요구사항 충족**: App Store 배포 준비 완료
 
 ### 💡 교훈
 - **패치 파일 활용**: 서드파티 라이브러리 이슈를 항시 모니터닝하고 패치 파일로 임시 대응 필요
