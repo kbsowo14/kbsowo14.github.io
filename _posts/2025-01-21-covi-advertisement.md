@@ -3,7 +3,6 @@ title: WebView 기반 광고 SDK 연동하기
 date: 2025-01-21 16:00:00 +0900
 categories: [개발일지, React Native]
 tags: [react-native, webview, 광고sdk, postmessage, 하이브리드앱]
-pin: false
 ---
 
 ## 🚀 시작하며

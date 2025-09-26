@@ -3,7 +3,6 @@ title: Expo SDK 53 마이그레이션 삽질기 🔥
 date: 2025-07-04 16:00:00 +0900
 categories: [개발일지, React Native]
 tags: [expo, react-native, migration, sdk53, 마이그레이션]
-pin: true
 ---
 
 ## 🚀 시작하며

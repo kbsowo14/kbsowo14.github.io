@@ -3,7 +3,6 @@ title: react-native-google-mobile-ads 구현하기 🎯
 date: 2024-11-27 16:00:00 +0900
 categories: [개발일지, React Native]
 tags: [expo, react-native, google-mobile-ads, admob, rewarded-ad, 광고]
-pin: false
 ---
 
 ## 🚀 시작하며
