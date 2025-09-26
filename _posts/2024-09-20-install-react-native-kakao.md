@@ -1,6 +1,6 @@
 ---
 title: React Native Kakao 라이브러리 등장! - 로그인부터 공유까지 구현하기
-date: 2025-09-20 16:00:00 +0900
+date: 2024-09-20 16:00:00 +0900
 category: [개발일지, React Native]
 tags: [React Native, 카카오SDK, 카카오로그인, 카카오공유, 소셜로그인, 게임화, 개발일지]
 ---
