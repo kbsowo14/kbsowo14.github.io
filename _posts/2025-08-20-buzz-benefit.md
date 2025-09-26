@@ -15,6 +15,9 @@ Expo로 개발하다 보면 가끔 이런 상황을 마주하게 돼요.
 
 그래서 직접 **Expo 서드파티 네이티브 모듈**을 만들어서 해결해야 했습니다.
 
+> 참고자료: [Expo 공식 문서 - Third Party Library 모듈 만들기](https://docs.expo.dev/modules/third-party-library/)
+
+
 ## 🗂 프로젝트 구조 살펴보기
 
 먼저 완성된 모듈의 전체 구조를 보여드릴게요:
