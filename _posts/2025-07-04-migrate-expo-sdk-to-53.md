@@ -34,7 +34,7 @@ React Query v5부터 `remove()` 메소드가 deprecated 되었다. 현재는 v4�
 ### 🔧 해결 방법
 
 #### `remove()` 메소드 대체
-```jsx
+```javascript
 // Before ❌
 const { remove } = useQuery({})
 remove()
@@ -45,7 +45,7 @@ queryClient.removeQueries({ queryKey: ['key'] })
 ```
 
 #### `isLoading` → `isPending` 변경
-```jsx
+```javascript
 // Before ❌
 const { mutate, isLoading } = useMutation({})
 
@@ -59,7 +59,7 @@ const { mutate, isPending } = useMutation({})
 
 기존의 파라미터 전달 방식이 deprecated 될 예정이라 미리 수정했다.
 
-```jsx
+```javascript
 // Before ❌
 queryClient.invalidateQueries(queryKey)
 
@@ -78,7 +78,7 @@ queryClient.invalidateQueries({ queryKey: queryKey })
 #### Touchable 컴포넌트 단순화
 기존의 `isOrigin` 옵션을 제거하고 `react-native`의 TouchableOpacity만 사용하도록 변경했다.
 
-```jsx
+```javascript
 // Before ❌ - 복잡한 조건부 렌더링, gesture-handler의 Touchable 시리즈 deprecated
 {isOrigin && (
   <RNTouchableOpacity {...props}>
@@ -98,7 +98,7 @@ queryClient.invalidateQueries({ queryKey: queryKey })
 ```
 
 #### TouchableWithoutFeedback → Pressable 대체
-```jsx
+```javascript
 // Before ❌
 <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
   <SearchAdRolling />
@@ -118,7 +118,7 @@ queryClient.invalidateQueries({ queryKey: queryKey })
 
 `react-native-gesture-handler`의 FlatList에서 ListEmptyComponent에 Fragment(`<></>`)를 최상위 컴포넌트로 사용할 수 없게 되었다.
 
-```jsx
+```javascript
 // Before ❌
 ListEmptyComponent={
   <>
@@ -144,7 +144,7 @@ ListEmptyComponent={
 
 RN 버전 업데이트로 인해 이미지 컴포넌트 랜더링 중 사용되지 않는 state 변경으로 에러가 발생했다.
 
-```jsx
+```javascript
 // Before ❌ - 불필요한 state
 const [imageLayout, setImageLayout] = useState({ width: 0, height: 0 })
 
@@ -173,7 +173,7 @@ const handleLayout = e => {
 
 새로운 BottomSheet에서는 `enableDynamicSizing`을 false로 설정해야 기존 `snapPoints` 옵션을 사용할 수 있다.
 
-```jsx
+```javascript
 <BottomSheet
   ref={bottomSheetRef}
   snapPoints={snapPoints}
@@ -224,7 +224,7 @@ RN 버전 업데이트에 따른 props 전달 방식 오류로 패치파일을 �
 
 Camera 관련 API가 대폭 변경되었다.
 
-```jsx
+```javascript
 // Before ❌
 import { Camera } from 'expo-camera'
 const [permissionForCamera, requestPermissionForCamera] = Camera.useCameraPermissions()
@@ -244,7 +244,7 @@ const [permission, requestPermission] = useCameraPermissions()
 
 Expo SDK 53부터 안드로이드 스플래시 이미지가 전체 화면에서 가운데 원형으로 변경되었다. 그래서 스플래시 이미지의 사이즈를 별도로 변경해줘야 했다.
 
-```jsx
+```javascript
 // app.config.js
 export default {
   expo: {
@@ -274,7 +274,7 @@ export default {
 Firebase 라이브러리가 앱 인스턴스를 생성하여 사용하는 방식으로 변경되었다.
 
 ### Analytics
-```jsx
+```javascript
 // Before ❌
 import analytics from '@react-native-firebase/analytics'
 analytics().logEvent(eventName, eventParams)
@@ -289,7 +289,7 @@ logEvent(firebaseAnalytics, eventName, eventParams)
 ```
 
 ### Messaging
-```jsx
+```javascript
 // Before ❌
 import messaging from '@react-native-firebase/messaging'
 const token = await messaging().getToken()
@@ -306,7 +306,7 @@ const token = await getToken(messaging)
 
 props로 전달된 `ref: null`이 내부 ref를 오버라이딩하는 문제가 발생했다.
 
-```jsx
+```javascript
 // Before ❌
 <ScrollView
   ref={el => {
@@ -335,7 +335,7 @@ const { ref, ...rest } = args || {}
 
 WebView의 `decelerationRate`에서 문자열 값이 에러를 발생시켰다.
 
-```jsx
+```javascript
 // Before ❌
 <WebView
   decelerationRate={"normal"} // 문자열 에러
