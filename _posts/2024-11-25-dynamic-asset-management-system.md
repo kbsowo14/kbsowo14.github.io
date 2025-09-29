@@ -1,49 +1,55 @@
 ---
-title: '앱 경량화의 딜레마 해결기 - 동적 에셋 관리 시스템 구축하기'
+title: '게임 서비스가 있는 앱 경량화 하기! - 에셋 관리 시스템'
 date: 2024-11-25 16:00:00 +0900
 categories: [개발일지, React Native]
 tags: [React Native, 게임개발, 앱최적화, 에셋관리, AsyncStorage, 경량화, 서버최적화]
 ---
 
-# 게임 앱 경량화의 딜레마 해결기 ⚖️
+서버 비용은 너무나 비싸다!
+당연히 요즘 서버 호출이 조금만 늘어도 연락이온다! (서비스에 무슨일 있냐며...)
 
-모바일 게임 개발에서 **앱 용량**과 **서버 비용** 사이의 트레이드오프는 항상 고민거리다. 우리 팀도 농장 게임을 운영하면서 이 딜레마에 직면했고, 창의적인 해결책을 찾아 구현한 경험을 공유하려고 한다.
+서비스에 무슨일이 있긴합니다! 새로운 이벤트 및 서비스로 인해 내부 객체를 갱신하거나 리패치를 돌려야하는 동작이 점점 생기게 됬으니!
 
-## 📋 문제 상황
+아무리 생각해도 반드시 리패치는 돌려야한다. 실시간의 데이터 동기화가 유저마다 필요했기 때문이다.
+그렇다면 방법은 하나다. 리패치 항목중 불필요한 리패치를 최소화 해보자!
+그래서 결국 고민한건 특별한 업데이트가 아니면 앱 리소스로 관리하는게 좋겠다!
 
-### 초기 문제점들
+게임 내에서 사용하는 설정 값들과 에셋들을 앱 스토리지에 저장을 시켜놓고 사용하기로 했다!
 
-1. **앱 용량 증가** 📈
+---
 
+## 문제점들...
+
+1. **앱 용량 증가**
    - 게임 특성상 수많은 이미지 에셋 필요
    - 작물, UI, 아이템 등 다양한 그래픽 리소스
-   - 앱스토어 다운로드 허들 증가
 
-2. **하드코딩된 게임 설정** 🔧
-
+2. **하드코딩된 게임 설정**
    - 게임 밸런스 값들이 코드에 직접 입력
    - 작은 수정에도 전체 앱 업데이트 필요
    - CodePush 배포 빈도 증가로 인한 부담
 
-3. **업데이트 프로세스 복잡성** 🔄
+3. **업데이트 프로세스 복잡성**
    - PM/PD의 게임 밸런스 조정 요청
    - 개발자의 코드 수정 → 빌드 → 배포 과정
    - 빠른 대응의 어려움
 
-## 💡 해결 아이디어
+---
+
+## 아이디어...
 
 **"서버에서 동적으로 에셋과 설정을 관리하되, 불필요한 중복 호출은 방지하자!"**
 
-### 핵심 아이디어
+- **서버 중앙화**: 이미지와 게임 설정을 서버에서 관리
+- **로컬 캐싱**: 한 번 받은 데이터는 로컬에 저장
+- **버전 기반 업데이트**: 변경사항이 있을 때만 새로 다운로드
+- **효율적 동기화**: 헬스체크 방식으로 최소한의 네트워크 사용
 
-- 🌐 **서버 중앙화**: 이미지와 게임 설정을 서버에서 관리
-- 📱 **로컬 캐싱**: 한 번 받은 데이터는 로컬에 저장
-- 🔄 **버전 기반 업데이트**: 변경사항이 있을 때만 새로 다운로드
-- ⚡ **효율적 동기화**: 헬스체크 방식으로 최소한의 네트워크 사용
+---
 
-## 🛠 시스템 아키텍처
+## 구현 방법
 
-### 1. 데이터 구조 설계
+### 1. 데이터 형태 미리보기 (사실 아래 예시 데이터보다 훠얼~씬 많고 크다)
 
 ```javascript
 // 서버에서 제공하는 Static Data 구조
@@ -68,11 +74,23 @@ const staticDataStructure = {
 }
 ```
 
-### 2. 버전 관리 시스템
+### 2. 버전 체크 로직 구현하기
 
-가장 핵심적인 부분인 버전 체크 로직:
+가장 핵심적인 부분인 버전 체크 로직!
+데이터를 불러오는 API를 호출하기전에
+checkStaticVersion API를 호출하여 현재 버전과 서버에 등록되어있는 버전을 비교해서 업데이트 필요 여부를 파악한다!
+(물론 초기에는 없으니 바로 호출하겠지만)
+
+버전의 형태는 날짜를 연결한 Number 형태로 관리한다. 20241025 < 20241026
 
 ```javascript
+// 버전 체크 API
+const checkStaticVersion = async () => {
+	const response = await fetch('/api/farm/static-version')
+	return response.json() // { ver: 20241026 }
+}
+
+// 버전 체크 및 데이터 업데이트
 const updateFarmStaticData = async () => {
 	try {
 		// 1. 서버에서 현재 최신 버전 확인
@@ -107,9 +125,10 @@ const updateFarmStaticData = async () => {
 }
 ```
 
-### 3. 효율적인 Hook 설계
+### 3. 저장되어있는 데이터를 사용하게 해주는 Hook 구현하기
 
-React Hook으로 깔끔하게 추상화:
+이 Hook은 저장되어있는 데이터를 사용하게 해주는 Hook이다.
+물론 상단에 구현한 업데이트 함수도 제공해준다.
 
 ```javascript
 export const useFarmStaticData = () => {
@@ -133,48 +152,13 @@ export const useFarmStaticData = () => {
 }
 ```
 
-## 🔧 구현 세부사항
+## 사용 예시
 
-### 1. 버전 체크 API
 
-서버에서는 두 개의 경량화된 엔드포인트 제공:
 
-```javascript
-// 버전만 확인하는 경량 API
-const checkStaticVersion = async () => {
-	const response = await fetch('/api/farm/static-version')
-	return response.json() // { ver: 2401011200 }
-}
-
-// 실제 데이터를 받아오는 API
-const getStaticData = async () => {
-	const response = await fetch('/api/farm/static-data')
-	return response.json() // 전체 에셋과 설정 데이터
-}
-```
-
-### 2. 에러 처리 및 폴백
-
-통신에 실패하더라도 게임은 진행할 수 있도록 하는 정책을 반영하기위해 에러 로깅만 하고 게임 진행을 위한 처리는 하지 않는다.
+### 1. 앱 입장 및 포커싱이 될때마다 업데이트 로직 실행
 
 ```javascript
-const updateFarmStaticData = async () => {
-	try {
-		// ... 업데이트 로직
-		return true
-	} catch (error) {
-		// 통계 전송으로 에러 모니터링
-		clientErrorToStatistics({
-			key: 'update-farm-static-data-error',
-			error: String(error),
-		})
-
-		// 에러 발생 시 게임 입장 차단
-		return false
-	}
-}
-
-// 사용하는 곳에서
 const canEnterGame = await updateFarmStaticData()
 if (!canEnterGame) {
 	// 에러 메시지 표시 및 재시도 유도
@@ -182,108 +166,31 @@ if (!canEnterGame) {
 }
 ```
 
-### 3. 특별한 데이터 처리
-
-일부 데이터는 추가 가공이 필요했다.
+### 2. 저장된 데이터 사용하기
 
 ```javascript
-// 이벤트 보상 데이터 파싱
-const parsedInviteReward = await parseInviteEventReward(
-	needsUpdate ? newData.invite_reward : localData.invite_reward.origin
-)
-
-// 최종 저장 데이터 구성
-const finalData = {
-	...rawData,
-	data: {
-		...rawData.data,
-		invite_reward: parsedInviteReward, // 가공된 데이터
-	},
-	ver: serverVersion,
-}
+const { farmStaticData } = useFarmStaticData()
+console.log(farmStaticData)
 ```
+---
 
-## 📊 성과 및 효과
+## 효과들...
 
-### 1. 앱 용량 최적화 📱
-
+### 1. 앱 용량 최적화
 - **Before**: 모든 에셋 포함 → 100MB+ 앱 크기
 - **After**: 필수 에셋만 포함 → 50MB 이하로 경량화
-- **결과**: 다운로드 허들 대폭 감소
 
-### 2. 서버 비용 절약 💰
-
+### 2. 서버 비용 절약 (트래픽 50% 감소)
 - **Before**: 매 실행마다 에셋 요청 → 수만 명 × 매일 호출
 - **After**: 버전 체크만 → 업데이트 시에만 실제 다운로드
-- **결과**: 네트워크 트래픽 50% 이상 감소
 
-### 3. 개발 프로세스 개선 🚀
-
+### 3. 개발 프로세스 개선 (이제 프론트의 코드 푸시 없이 바로 적용 가능)
 - **Before**: 설정 변경 → 코드 수정 → 전체 배포
 - **After**: 서버 설정 변경 → 즉시 반영
-- **결과**: PM/PD 요청 대응 시간 단축
-
-### 4. 사용자 경험 향상 ✨
-
-- 앱 다운로드 속도 향상
-- 게임 실행 시 빠른 로딩
-- 설정 변경 시 즉시 반영
-
-## 🎯 핵심 설계 원칙
-
-### 1. **레이지 로드 방식을 통해 필요한 시점에만 데이터 로필**
-계
-```javascript
-// 필요한 시점에만 데이터 로드 (업데이트 타임 체크 필요)
-useEffect(() => {
-	if (shouldEnterFarm) {
-		updateFarmStaticData()
-	}
-}, [shouldEnterFarm])
-```
-
-### 2. **최대한 로컬 데이터를 사용하도록 설계**
-
-```javascript
-// 로컬 데이터 우선 사용
-const loadData = async () => {
-	// 1. 로컬 데이터 먼저 로드
-	const localData = await getLocalData()
-	setData(localData)
-
-	// 2. 백그라운드에서 업데이트 체크
-	checkForUpdates()
-}
-```
-
-## 🚨 잠깐! 신규 사용자는 로컬에 데이터가 없잖아?
-
-**문제**: 신규 사용자는 로컬에 데이터가 없음
-
-**해결책**:
-
-```javascript
-const initializeStaticData = async () => {
-	const localData = await getLocalData()
-
-	if (!localData) {
-		// 신규 사용자는 무조건 다운로드
-		showLoadingScreen('게임 데이터 준비 중...')
-		await forceUpdateStaticData()
-	}
-}
-```
-
-
-## 🔚 마무리
-
-이 프로젝트를 통해 **"완벽한 해결책은 없지만, 창의적인 접근으로 여러 문제를 동시에 해결할 수 있다"**는 것을 배웠다.
-
-### 핵심 교훈들:
-
-- 🎯 **사용자 중심 사고**: 다운로드 경험과 앱 성능 모두 고려
-- 💰 **비용 효율성**: 개발 비용과 운영 비용의 균형
-
-이제 PM이 "이 값 좀 바꿔주세요"라고 하면 "네, 5분 후에 반영됩니다"라고 답할 수 있게 되었다! 🎉
 
 ---
+
+## 마무리
+
+이 프로젝트를 통해 **"완벽한 해결책은 없지만, 창의적인 접근으로 여러 문제를 동시에 해결할 수 있다"**는 것을 배웠다.
+이제 PM이 "이 값 좀 바꿔주세요"라고 하면 "네, 5분 후에 반영됩니다"라고 답할 수 있게 되었다!

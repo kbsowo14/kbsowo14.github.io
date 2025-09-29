@@ -10,7 +10,9 @@ tags: [Expo, FCM, Firebase, 푸시알림, react-native-firebase, 메시징, 개�
 
 **Firebase Cloud Messaging(FCM + notifee)** 을 구현해보자!
 
-## 📦 설치 및 초기 설정
+---
+
+## 설치 및 초기 설정
 
 ### 1. 패키지 설치
 
@@ -72,7 +74,9 @@ const messaging = getMessaging(firebaseApp)
 let notifeeData = {}
 ```
 
-## 🔧 핵심 구현 사항들
+---
+
+## 핵심 구현 사항들
 
 ### 1. 메시지 토큰 관리
 
@@ -299,7 +303,9 @@ export const setFirebaseBackgroundMessageHandler = () => {
 }
 ```
 
-## 🔄 실제 구현 패턴
+---
+
+## 실제 구현 패턴
 
 ### 1. 앱 초기화 시 FCM + Notifee 설정
 
@@ -352,7 +358,9 @@ function App() {
 }
 ```
 
-## 🫠 토큰 캐싱을 해볼까? (실제 적용 사례는 없지만...)
+---
+
+## 토큰 캐싱을 해볼까? (실제 적용 사례는 없지만...)
 
 ```javascript
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -376,6 +384,6 @@ const setCachedToken = async token => {
 }
 ```
 
-## 🎉 마무리 요약!
+## 마무리
 
 **FCM**과 **Notifee**를 푸시의 형태에 따라 서버에서 각각 나누어서 사용하도록 설계해놓았으니! 이제 안드로이드 푸시 구현이 완료되었다!

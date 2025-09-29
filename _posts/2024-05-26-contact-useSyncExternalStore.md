@@ -5,39 +5,24 @@ category: [개발일지, React]
 tags: [React, useSyncExternalStore, 상태관리, 성능최적화, 글로벌상태, Tearing방지, 개발일지]
 ---
 
-# 글로벌 상태 관리가 필요한데 어떻게 해야할까?
+??? : 글로벌 상태 관리 어떤거 쓸까용?...
 
-Redux는 뭔가 호감이 가지 않고...
-Context는 불필요한 리렌더링이 많고...
-그래서 우리 팀이 선택한 건 **useSyncExternalStore**를 활용한 커스텀 글로벌 상태 관리 시스템!
+Redux는 뭔가 선뜻 호감이 가지 않네요...;;
+Context는 Provider 지옥에 빠질 수 있는 부분이 염려가 됩니다...
+이는 곧 앱 최적화에 치명적인 문제를 불러일으킬 수 있죠. 물론! 디버깅도 힘듭니다!
+그래서 선택한 건 **useSyncExternalStore**를 활용한 가볍고 저렴한! 커스텀 글로벌 상태 관리 훅을 만들기! 입니다.
 
-## 왜 또 다른 상태 관리 도구를 만들었나?
+(외부 라이브러리에 의존하는건 더욱 지양하는터라...)
+"그냥 최상위에서 동작하는 상태 관리를 만들자~" 가 시작이였습니다!
 
-### 기존 도구들의 아쉬운 점들
+---
 
-**Redux**
+## useSyncExternalStore 이해하기
 
-- 너무 무겁고 보일러플레이트가 많음
-- 작은 상태 하나 바꾸려고 액션, 리듀서 다 만들어야 함
-- 간단한 전역 상태 하나만 쓰고 싶은데...
+React 18에서 새로 나온 이 훅은 **외부 스토어와 React를 안전하게 연결**해줍니다!
 
-**Context** 🟠
 
-- Provider 지옥 (Provider 안에 Provider 안에 Provider...)
-- 하나의 값이 바뀌면 모든 하위 컴포넌트가 리렌더링
-- 성능 최적화하면서 느끼는점은 역시... "이게 진짜 최적화 맞지? 🫠"
-
-**Zustand, Jotai 등** 🟡
-
-- 외부 라이브러리에 의존하지는 않기로 했어요...
-
-그냥 최상위에서 동작하는 상태 관리를 만들자~
-
-## 🔍 useSyncExternalStore가 뭐길래?
-
-React 18에서 새로 나온 이 훅은 **외부 스토어와 React를 안전하게 연결**해주는 역할을 해요.
-
-### 핵심 개념
+### 예제
 
 ```javascript
 const value = useSyncExternalStore(subscribe, getSnapshot)
@@ -46,24 +31,27 @@ const value = useSyncExternalStore(subscribe, getSnapshot)
 - **subscribe**: 스토어 변경을 구독하는 함수
 - **getSnapshot**: 현재 스토어 값을 가져오는 함수
 
+
 ### 왜 이게 좋은가?
 
-1. **Tearing 방지** 🛡️
+1. **Tearing 방지**
 
    - 유저의 동시성 렌더링에서 발생할 수 있는 상태 불일치 문제 해결 가능
    - 모든 컴포넌트가 항상 일관된 상태를 보게 됨
 
-2. **성능 최적화** ⚡
+2. **성능 최적화** (getter와 setter를 분리 사용 목표)
 
    - 필요한 컴포넌트만 리렌더링 설계 가능
    - 구독/해지가 자동으로 관리됨
 
+---
 
 ## 우리만의 스토어 시스템 구축하기
 
 ### 기본 스토어 만들기
 
 먼저 가장 기본이 되는 스토어부터 만들어봤어요.
+utils.js 파일에 스토어 생성 함수를 만들었습니다!
 
 ```javascript
 // utils.js
@@ -107,9 +95,35 @@ eexport function createState(initialState) {
 - 중복 구독 방지 (같은 함수를 여러 번 등록해도 한 번만 실행)
 - 빠른 추가/삭제 (시간 복잡도)
 
-## 생성한 스토어 사용하기
+### 각각 사용할 스토어 상태 정의하기
 
-### useStoreState (읽기 쓰기 모두 가기)
+자기만의 스토어 상태를 정의하도록 app.ts 라는 파일에 작성했습니다!
+key는 스토어 상태를 구분하기 위해 사용합니다.
+default는 스토어 상태의 초기값을 설정합니다.
+
+```javascript
+// app.ts
+export const userState = createState({
+	key: 'app/userState',
+	default: {},
+})
+
+export const alertState = createState({
+	key: 'app/alertState',
+	default: { visible: null },
+})
+
+export const routeNameState = createState({
+	key: 'app/routeNameState',
+	default: '',
+})
+```
+
+---
+
+## [getter & setter, getter, setter] 쓰임새에 따라 사용할 수 있는 3종 훅 만들기
+
+### useStoreState (읽기 쓰기 모두 가능)
 
 ```javascript
 export default function useStoreState(store, selector) {
@@ -159,31 +173,11 @@ export function useSetStoreState(store) {
 }
 ```
 
-## 🏗 실제 사용 예시
+---
 
-### 1. 상태 정의하기
+## 사용 예시
 
-```javascript
-// app.ts
-export const userState = createState({
-	key: 'app/userState',
-	default: {},
-})
-
-export const alertState = createState({
-	key: 'app/alertState',
-	default: { visible: null },
-})
-
-export const routeNameState = createState({
-	key: 'app/routeNameState',
-	default: '',
-})
-```
-
-### 2. 컴포넌트에서 사용하기
-
-**읽기 + 쓰기가 모두 필요한 컴포넌트**
+#### 읽기 + 쓰기가 모두 필요한 컴포넌트
 
 ```javascript
 function UserProfile() {
@@ -202,7 +196,7 @@ function UserProfile() {
 }
 ```
 
-**읽기만 필요한 컴포넌트**
+#### 읽기만 필요한 컴포넌트
 
 ```javascript
 function UserGreeting() {
@@ -213,7 +207,7 @@ function UserGreeting() {
 }
 ```
 
-**쓰기만 필요한 컴포넌트 (리렌더링 방지)**
+#### 쓰기만 필요한 컴포넌트 (리렌더링 방지)
 
 ```javascript
 function LogoutButton() {
@@ -229,9 +223,11 @@ function LogoutButton() {
 }
 ```
 
-## 🎯 Selector를 활용한 세밀한 구독
+---
 
-큰 객체에서 특정 부분만 구독하고 싶을 때:
+## Selector를 활용해서 특정 데이터만 포커싱 하기
+
+너무나 큰 데이터에서 특정 부분만 포커싱 하고 싶을 때 selector 함수를 전달해서 사용할 수 있도록 설계 했습니다!
 
 ```javascript
 const bigState = createState({
@@ -265,7 +261,9 @@ function ThemeToggle() {
 }
 ```
 
-## 🔚 마무리
+---
+
+## 마무리
 
 글로벌 상태 관리 시스템을 활용하면서...
 

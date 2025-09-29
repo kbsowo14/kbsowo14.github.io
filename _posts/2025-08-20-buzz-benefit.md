@@ -5,37 +5,36 @@ category: [개발일지, React Native]
 tags: [Expo, 네이티브모듈, SDK통합, Kotlin, Swift, 서드파티, 버즈빌]
 ---
 
-# Expo 프로젝트에 서드파티 네이티브 SDK 모듈 만들기 - 버즈빌 베네핏허브 연동 🚀
+Expo로 개발하다 보면 가끔 이런 상황을 꽤 자주 마주하게 된다!
+"Expo 설정이 없네?"
 
-Expo로 개발하다 보면 가끔 이런 상황을 마주하게 돼요.
+이러면 이제 Android & iOS 네이티브 모듈을 따로 만들어서 Expo 빌드와 연결해주어야 한다!
 
-> "앱 수익화를 위해 버즈빌 베네핏허브 SDK를 사용하고 싶은데... Expo용 패키지 설정이 없네? 😭"
-
-버즈베네핏 SDK는 **Android(Kotlin)** 과 **iOS(Swift)** 네이티브 SDK뿐이었거든요.
-
-그래서 직접 **Expo 서드파티 네이티브 모듈**을 만들어서 해결해야 했습니다.
+마침 버즈빌 업체의 버즈베네핏 SDK 설치 요청이 들어왔는데, 역시 네이티브 모듈을 패키징 해야했다.
+(**Android(Kotlin)** 과 **iOS(Swift)** 네이티브 SDK뿐이었거든요...)
 
 > 참고자료: [Expo 공식 문서 - Third Party Library 모듈 만들기](https://docs.expo.dev/modules/third-party-library/)
 
+---
 
-## 🗂 프로젝트 구조 살펴보기
-
-먼저 완성된 모듈의 전체 구조를 보여드릴게요:
+## 프로젝트 구조 살펴보기
 
 ```
 /modules/buzzvil-module/
-├── 📁 android/                    # Android 네이티브 구현
-│   ├── build.gradle               # Android 빌드 설정 파일
+├── android/                                        # Android 네이티브 구현
+│   ├── build.gradle                                # Android 빌드 설정 파일
 │   └── src/main/java/expo/modules/buzzvilmodule/
-│       └── BuzzvilModule.kt       # Kotlin으로 구현한 메인 모듈 (중요)
-├── 📁 ios/                        # iOS 네이티브 구현
-│   ├── BuzzvilModule.podspec      # iOS 의존성 패키지 설정 파일
-│   └── BuzzvilModule.swift        # Swift로 구현한 메인 모듈 (중요)
-├── 📄 expo-module.config.json     # Expo 모듈 설정 파일
-└── 📄 index.ts                    # TypeScript 인터페이스 도출 파일
+│       └── BuzzvilModule.kt                        # Kotlin으로 구현한 메인 모듈 (중요)
+├── ios/                                            # iOS 네이티브 구현
+│   ├── BuzzvilModule.podspec                       # iOS 의존성 패키지 설정 파일
+│   └── BuzzvilModule.swift                         # Swift로 구현한 메인 모듈 (중요)
+├── expo-module.config.json                         # Expo 모듈 설정 파일
+└── index.ts                                        # TypeScript 인터페이스 도출 파일
 ```
 
-## 1. 모듈 생성하기
+---
+
+## 모듈 생성하기
 
 ```bash
 npx create-expo-module --local buzzvil-module
@@ -44,7 +43,9 @@ npx create-expo-module --local buzzvil-module
 완료되면 modules 폴더와 buzzvil-module 폴더가 생성되면서 내부의 기본 뼈대가될 파일들이 자동으로 생성되어있을 겁니다!
 View 컴포넌트를 만들어서 사용할 것은 아니기때문에 View 와 관련된 파일들은 깔끔하게 제거를 해줬습니다! (버즈베네핏 SDK 내부에서 View를 다 동작시켜주거든요.)
 
-## 2. 인터페이스 정의
+---
+
+## 인터페이스 정의
 
 이제 네이티브 코드들을 우리 RN 프로젝트에서 사용할 수 있도록 export 함수들을 정의해줍니다!
 
@@ -118,13 +119,15 @@ export default {
 
 여기서 중요한 건 **에러 처리**입니다. 네이티브 모듈이 제대로 로드되지 않았을 때를 대비해서 안전장치를 만들어뒀습니다!
 
-## 3. Android 네이티브 모듈 구현
+---
+
+## Android 네이티브 모듈 구현
 
 연결해주는 인터페이스를 정의했으니, 인터페이스 코드에서 꺼내서 사용할 실제 안드로이드 네이티브 코드들을 구현해줍니다!
 제가 다 작성한건아니고, 모듈을 처음 create하면 일부분은 알아서 작성되어져 있습니다! 몇가지만 수정해놓으면 되요!
 (여기서 중요한건! 반드시 버즈베네핏 공식 문서 가이드를 참고해서 구현해줍니다!)
 
-### 3-1. Android 빌드 설정
+### Android 빌드 설정
 
 **`android/build.gradle`**
 
@@ -171,7 +174,7 @@ dependencies {
   // Kotlin 표준 라이브러리
   implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.10'
 
-  // 🚀 버즈빌 SDK
+  // 버즈빌 SDK
   def buzzvilBomVersion = "6.0.0"
   implementation(platform("com.buzzvil:buzzvil-bom:$buzzvilBomVersion")) {
     exclude(group: 'com.buzzvil', module: 'buzz-covi')
@@ -182,7 +185,7 @@ dependencies {
 }
 ```
 
-### 3-2. Kotlin 메인 모듈 구현
+### Kotlin 메인 모듈 구현
 
 이제 나는 잠시 안드로이드 네이티브 개발자가 되어야 한다! 허허허허허허
 
@@ -210,7 +213,7 @@ class BuzzvilModule : Module() {
 
         Name("BuzzvilModule")
 
-        // 🚀 SDK 초기화
+        // SDK 초기화
         AsyncFunction("initialize") { appId: String, promise: Promise ->
             val context = appContext.reactContext ?: run {
                 promise.reject("NO_CONTEXT", "리액트 컨텍스트를 찾을 수 없습니다", null)
@@ -238,7 +241,7 @@ class BuzzvilModule : Module() {
             }
         }
 
-        // 🔐 사용자 로그인
+        // 사용자 로그인
         AsyncFunction("login") { userId: String, gender: String?, birthYear: Int?, promise: Promise ->
             val context = appContext.reactContext ?: run {
                 promise.reject("NO_CONTEXT", "리액트 컨텍스트를 찾을 수 없습니다", null)
@@ -275,7 +278,7 @@ class BuzzvilModule : Module() {
             }
         }
 
-        // 🚪 로그아웃
+        // 로그아웃
         Function("logout") {
             try {
                 BuzzvilSdk.logout()
@@ -287,7 +290,7 @@ class BuzzvilModule : Module() {
             }
         }
 
-        // ✅ 로그인 상태 확인
+        // 로그인 상태 확인
         Function("isLoggedIn") {
             try {
                 val isLoggedIn = BuzzvilSdk.isLoggedIn
@@ -299,7 +302,7 @@ class BuzzvilModule : Module() {
             }
         }
 
-        // 🎯 베네핏허브 화면 표시 (가장 복잡한 부분!)
+        // 베네핏허브 화면 표시 (가장 복잡한 부분!)
         AsyncFunction("show") { promise: Promise ->
             try {
                 val activity = appContext.activityProvider?.currentActivity
@@ -345,9 +348,11 @@ class BuzzvilModule : Module() {
 }
 ```
 
-## 4. iOS 네이티브 모듈 구현
+---
 
-### 4-1. iOS 의존성 설정
+## iOS 네이티브 모듈 구현
+
+### iOS 의존성 설정
 
 이제 iOS 차례다... Podfile에 의존성을 추가해줍니다! (여기도 공식 문서를 반드시 참고해야합니다!)
 
@@ -382,7 +387,7 @@ Pod::Spec.new do |s|
 end
 ```
 
-### 4-2. Swift 메인 모듈 구현
+### Swift 메인 모듈 구현
 
 또다시 나는 잠시 iOS 네이티브 개발자가 되어야 한다! 허허허허허허
 
@@ -397,7 +402,7 @@ public class BuzzvilModule: Module {
 
     Name("BuzzvilModule")
 
-    // 🚀 SDK 초기화
+    // SDK 초기화
     AsyncFunction("initialize") { (appId: String, promise: Promise) in
       do {
         let config = BuzzBenefitConfig.Builder(appId: appId)
@@ -409,7 +414,7 @@ public class BuzzvilModule: Module {
       }
     }
 
-    // 🔐 사용자 로그인
+    // 사용자 로그인
     AsyncFunction("login") { (userId: String, gender: String?, birthYear: Int?, promise: Promise) in
       let userBuilder = BuzzBenefitUser.Builder(userId: userId)
 
@@ -445,17 +450,17 @@ public class BuzzvilModule: Module {
       )
     }
 
-    // 🚪 로그아웃
+    // 로그아웃
     Function("logout") {
       BuzzBenefit.shared.logout()
     }
 
-    // ✅ 로그인 상태 확인
+    // 로그인 상태 확인
     Function("isLoggedIn") { () -> Bool in
       return BuzzBenefit.shared.isLoggedIn()
     }
 
-    // 🎯 베네핏허브 화면 표시
+    // 베네핏허브 화면 표시
     AsyncFunction("show") { (promise: Promise) in
       DispatchQueue.main.async {
         guard let rootViewController = UIApplication.shared.windows.first?.rootViewController else {
@@ -463,7 +468,7 @@ public class BuzzvilModule: Module {
           return
         }
 
-        // 🔍 최상위 뷰 컨트롤러 찾는 재귀 함수
+        // 최상위 뷰 컨트롤러 찾는 재귀 함수
         func topViewController(controller: UIViewController? = rootViewController) -> UIViewController? {
           if let navigationController = controller as? UINavigationController {
             return topViewController(controller: navigationController.visibleViewController)
@@ -500,12 +505,14 @@ public class BuzzvilModule: Module {
 }
 ```
 
-## 5. 프로젝트 설정 파일 수정
+---
+
+## 프로젝트 설정 파일 수정
 
 자이제 모듈 설치는 끝났다! (빌드하고 에러나고 빌드하고 에러나고... 를 수없이 반복한 후 결국 해냈다!)
 이제 만든 모듈을 프로젝트에서 사용할 수 있도록 설정해야 합니다!
 
-### 5-1. TypeScript 경로 설정
+### TypeScript 경로 설정
 
 **`tsconfig.json`**
 
@@ -523,7 +530,7 @@ public class BuzzvilModule: Module {
 }
 ```
 
-### 5-2. JavaScript 경로 설정
+### JavaScript 경로 설정
 
 **`jsconfig.json`**
 
@@ -541,7 +548,7 @@ public class BuzzvilModule: Module {
 }
 ```
 
-### 5-3. Babel 모듈 해석 설정
+### Babel 모듈 해석 설정
 
 **`babel.config.js`**
 
@@ -572,7 +579,7 @@ module.exports = function (api) {
 }
 ```
 
-### 5-4. Expo 빌드 설정에 저장소 추가
+### Expo 빌드 설정에 저장소 추가
 
 **`app.config.js`**
 
@@ -602,17 +609,19 @@ plugins: [
 ],
 ```
 
-## 6. 실제 사용하기
+---
+
+## 실제 사용하기
 
 이제 만든 모듈을 실제로 사용해볼 시간이다!
 
-### 6-1. 모듈 import
+### 모듈 import
 
 ```typescript
 import buzzvilModule from '@buzzvil-module'
 ```
 
-### 6-2. 앱 초기화 시 SDK 초기화
+### 앱 초기화 시 SDK 초기화
 
 **`App.js`**
 
@@ -621,7 +630,7 @@ import buzzvilModule from '@buzzvil-module'
 
 const initializeBuzzvil = useCallback(async () => {
 	try {
-		/** Buzzvil 초기화 */
+		/** 버즈베네핏 초기화 */
 		const BUZZVIL_APP_ID = isIos ? '000000000000000' : '000000000000000'
 
 		await buzzvilModule.initialize(BUZZVIL_APP_ID)
@@ -635,7 +644,7 @@ useEffect(() => {
 }, [])
 ```
 
-### 6-3. 사용자 로그인/로그아웃 처리
+### 사용자 로그인/로그아웃 처리
 
 **`AuthContext.js`**
 
@@ -682,12 +691,12 @@ const logout = async ({ ... }) => {
 			await buzzvilModule.logout()
 		}
 	} catch (error) {
-		console.warn('🔥 Buzzvil logout error >>>>', error)
+		console.warn('Buzzvil logout error >>>>', error)
 	}
 }
 ```
 
-### 6-4. 베네핏허브 화면 표시
+### 베네핏허브 화면 표시
 
 ```typescript
 const showBuzzvilWaterMissionHandler = (): MissionHandler => ({
@@ -730,7 +739,9 @@ const showBuzzvilWaterMissionHandler = (): MissionHandler => ({
 })
 ```
 
-## 7. 마무리!
+---
+
+## 마무리!
 
 네이티브 개발자이자 크로스플랫폼 개발자를 왔다갔다하면서 혼돈의 카오스였지만 포기하지않고 계속해서 공식문서를 뚫어져서 파해친 결과 결국 연동에 성공할 수 있었다!
 이제는 RN SDK가 없더라도 웃으며 무엇이든지 모듈화 시킬 수 있는 자신감이 생겼습니다!
