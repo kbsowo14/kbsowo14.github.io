@@ -5,8 +5,6 @@ category: [개발일지, React Native]
 tags: [Expo, Notifications, 푸시알림, expo-notifications, 개발가이드]
 ---
 
-# Expo Notifications 구현 가이드!
-
 Expo Notifications는 React Native 앱에서 알림/푸시 시스템을 쉽게 구현할 수 있게 해주는 라이브러리 입니다!
 아래는 실제 프로젝트에서 사용중인 코드를 바탐으로 작업했던 구현 가이드입니다~ (코드로만 설명하겠다...)
 
@@ -25,7 +23,7 @@ expo install expo-task-manager
 expo install expo-device
 ```
 
-### 2. app.config.json 설정
+### 2. app.config.json 설정 (옵션은 선택사항)
 
 ```json
 {
@@ -37,11 +35,11 @@ expo install expo-device
 		},
 		"plugins": [
 			[
-				"expo-notifications", // 현재 프로젝트에는 사용하지 않은 추가 옵션들이라 "expo-notifications" 항목만 추가했었다.
+				"expo-notifications",
 				{
-					// "icon": "./local/assets/notification-icon.png",
-					// "color": "#ffffff",
-					// "sounds": ["./local/assets/notification-sound.wav"]
+					"icon": "./local/assets/notification-icon.png",
+					"color": "#ffffff",
+					"sounds": ["./local/assets/notification-sound.wav"]
 				}
 			]
 		]

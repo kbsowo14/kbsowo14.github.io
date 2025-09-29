@@ -5,8 +5,6 @@ category: [개발일지, React Native]
 tags: [Expo, FCM, Firebase, 푸시알림, react-native-firebase, 메시징, 개발가이드]
 ---
 
-# React Native Firebase Messaging (FCM + notifee) 구현 가이드! for Android 🔥
-
 원래는 프로젝트 성격상 Expo-notifications 를 사용하면 된다!
 하지만 AOS 디바이스에서 동작해야 할 푸시 형태를 다양하게 사용하기위해 FCM과 Notifee 라이브러리를 동시에 채용해버렸습니다!
 
@@ -40,10 +38,9 @@ yarn add @notifee/react-native
 }
 ```
 
-**중요:** Notifee는 Java JDK 11+가 필요합니다. EAS Build 사용 시 (클라우드 빌드 옵션이 다르기 때문!)
+**중요:** Notifee는 Java JDK 11+가 필요합니다. 개발 빌드 시 Eas cloud build 환경이 다르기 때문에 eas.json에 따로 설정해줘야 합니다!
 
 ```json
-// eas.json
 {
 	"build": {
 		"dev": {
